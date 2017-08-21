@@ -1,6 +1,7 @@
-# Project Title
+# Jenkins Plugin Example with Unit Test 
 
-One Paragraph of project description goes here
+This project is sample Jenkins Plugin Example which shows OOO on the Jenkins Job main page. 
+You will see how to create Jenkins Plugin project and how to write unit test for it. 
 
 ## Getting Started
 
