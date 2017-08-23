@@ -50,6 +50,10 @@ $ mvn hpi:run
 ```
 After Jenkins is up, you can access Jenkins at http://localhost:8080.
 
+If you want to run it Debug mode, you should enter following command.
+```
+$ mvnDebug hpi:run
+```
 
 ### Prerequisites
 
