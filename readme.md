@@ -44,7 +44,12 @@ First, you need to update ~/.m2/settings.xml to download dependencies related to
 </settings>
 ```
 
-Second, ...
+Second, run the following command to test the plugin. 
+```
+$ mvn hpi:run
+```
+After Jenkins is up, you can access Jenkins at http://localhost:8080.
+
 
 ### Prerequisites
 
