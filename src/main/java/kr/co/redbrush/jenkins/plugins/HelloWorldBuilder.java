@@ -1,4 +1,4 @@
-package kr.co.redbrush.jenkins.jenkinsppluginexample;
+package kr.co.redbrush.jenkins.plugins;
 import hudson.Launcher;
 import hudson.Extension;
 import hudson.FilePath;
