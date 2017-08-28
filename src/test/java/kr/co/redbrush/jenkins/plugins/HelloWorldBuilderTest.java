@@ -83,37 +83,18 @@ public class HelloWorldBuilderTest {
         FreeStyleProject project = jenkinsRule.createFreeStyleProject();
         project.getBuildersList().add(builderBefore);
 
-        String useFrench = "true";
         HtmlPage page = jenkinsRule.createWebClient().getPage(project, "configure");
+
+        LOGGER.info("Configure Project Page\n{}", page.getWebResponse().getContentAsString());
+
+        WebAssert.assertTextPresent(page, "Say hello world");
+
         HtmlForm form = page.getFormByName("config");
-        for (Object object : page.getByXPath("//input")) {
-            LOGGER.info("HtmlElement : {}", object);
-        }
-        HtmlInput useFrenchInput = (HtmlInput)page.getByXPath("//input");
-        useFrenchInput.setValueAttribute(useFrench);
         jenkinsRule.submit(form);
 
         HelloWorldBuilder builderAfter = project.getBuildersList().get(HelloWorldBuilder.class);
         jenkinsRule.assertEqualBeans(builderBefore, builderAfter, "name");
 
-        assertThat("useFrench value should be " + useFrench, builderAfter.getDescriptor().getUseFrench(), is(Boolean.valueOf(useFrench)));
+        LOGGER.info("builderName before : {}, after : {}", builderBefore.getName(), builderAfter.getName());
     }
-
-    /*
-    @Test
-    public void testUseFrench() throws Exception {
-        HelloWorldBuilder builder = new HelloWorldBuilder(builderName);
-
-        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
-        project.getBuildersList().add(builder);
-
-        FreeStyleBuild build = project.scheduleBuild2(0).get();
-        String log = FileUtils.readFileToString(build.getLogFile());
-
-        LOGGER.info("{} completed.", build.getDisplayName());
-        LOGGER.info("Log\n{}", log);
-
-        assertThat("Log is not containing echo String", log, containsString("+ echo hello"));
-    }
-    */
 }
