@@ -1,9 +1,10 @@
 package kr.co.redbrush.jenkins.plugins;
 
-import com.gargoylesoftware.htmlunit.WebAssert;
-import com.gargoylesoftware.htmlunit.html.*;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Descriptor;
-import hudson.model.FreeStyleProject;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.junit.Rule;
@@ -14,8 +15,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
-import static org.hamcrest.CoreMatchers.is;
+import java.io.PrintStream;
+
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -28,6 +32,12 @@ public class HelloWorldBuilderTest {
 
     @Mock
     private StaplerRequest staplerRequest;
+
+    @Mock
+    private TaskListener taskListener;
+
+    @Mock
+    private PrintStream printStream;
 
     private String builderName = "Builder Name";
     private String displayName = "Say hello world";
@@ -42,59 +52,33 @@ public class HelloWorldBuilderTest {
     }
 
     @Test
-    public void testUseFrench() throws Exception {
-        testUseFrench(true);
-        testUseFrench(false);
+    public void testUseFrenchConfiguration() throws Exception {
+        testUseFrenchConfiguration(true);
+        testUseFrenchConfiguration(false);
     }
 
-    private void testUseFrench(boolean useFrench) throws Descriptor.FormException {
+    private void testUseFrenchConfiguration(boolean useFrench) throws Descriptor.FormException {
+        Run build  = null;
+        FilePath workspace = null;
+        Launcher launcher = null;
+
+        when(taskListener.getLogger()).thenReturn(printStream);
+
         JSONObject formData = new JSONObject();
         formData.put("useFrench", useFrench);
 
         HelloWorldBuilder builder = new HelloWorldBuilder(builderName);
         builder.getDescriptor().configure(staplerRequest, formData);
+        builder.perform(build, workspace, launcher, taskListener);
 
         LOGGER.info("builder.getDescriptor.getUseFrench() : {}, useFrench : {}", builder.getDescriptor().getUseFrench(), useFrench);
 
         assertThat("useFrench value is not valid.", builder.getDescriptor().getUseFrench(), is(useFrench));
-    }
 
-    @Test
-    public void testConfigurePage() throws Exception {
-        HelloWorldBuilder builder = new HelloWorldBuilder(builderName);
-
-        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
-        project.getBuildersList().add(builder);
-
-        HtmlPage page = jenkinsRule.createWebClient().goTo("configure");
-
-        LOGGER.info("Configure Page\n{}", page.getWebResponse().getContentAsString());
-
-        WebAssert.assertTextPresent(page, "Hello World Builder");
-        WebAssert.assertTextPresent(page, "French");
-        WebAssert.assertTextPresent(page, "Check if we should say hello in French");
-        WebAssert.assertInputPresent(page, "_.useFrench");
-        WebAssert.assertInputDoesNotContainValue(page, "_.useFrench", "");
-    }
-
-    @Test
-    public void testHelloWorldBuilderConfig() throws Exception {
-        HelloWorldBuilder builderBefore = new HelloWorldBuilder(builderName);
-        FreeStyleProject project = jenkinsRule.createFreeStyleProject();
-        project.getBuildersList().add(builderBefore);
-
-        HtmlPage page = jenkinsRule.createWebClient().getPage(project, "configure");
-
-        LOGGER.info("Configure Project Page\n{}", page.getWebResponse().getContentAsString());
-
-        WebAssert.assertTextPresent(page, "Say hello world");
-
-        HtmlForm form = page.getFormByName("config");
-        jenkinsRule.submit(form);
-
-        HelloWorldBuilder builderAfter = project.getBuildersList().get(HelloWorldBuilder.class);
-        jenkinsRule.assertEqualBeans(builderBefore, builderAfter, "name");
-
-        LOGGER.info("builderName before : {}, after : {}", builderBefore.getName(), builderAfter.getName());
+        if (useFrench) {
+            verify(printStream).println("Bonjour, " + builder.getName() + "!");
+        } else {
+            verify(printStream).println("Hello, " + builder.getName() + "!");
+        }
     }
 }
