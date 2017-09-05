@@ -81,6 +81,8 @@ Just run Java Unit test
 $ mvn test
 ```
 
+Please note that this project has been tested on Unix and Linux. Some of test will failed on Windows. 
+
 ## Deployment
 
 If you got to this point, you should definitely consider hosting your plugin on jenkins-ci.org. Move on to this document for how to do that. This includes the instructions for releasing the plugin.
